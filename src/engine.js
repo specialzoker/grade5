@@ -33,3 +33,26 @@ export function search(rows, lo, hi) {
     return typeof c === 'number' && c > lo && c < hi
   })
 }
+
+/** filters: { regions: Set<string>(빈 Set = 전체), type: ''|'교과'|'종합', track: ''|계열 } */
+export function applyFilters(rows, { regions, type, track }) {
+  return rows.filter((r) =>
+    (regions.size === 0 || regions.has(r[COL.region])) &&
+    (!type || r[COL.type] === type) &&
+    (!track || r[COL.track] === track),
+  )
+}
+
+const collator = new Intl.Collator('ko')
+
+/** 새 배열 반환. null/undefined는 방향과 무관하게 항상 마지막. */
+export function sortRows(rows, colIndex, dir = 'asc') {
+  const sign = dir === 'desc' ? -1 : 1
+  return [...rows].sort((a, b) => {
+    const x = a[colIndex], y = b[colIndex]
+    const xn = x == null, yn = y == null
+    if (xn || yn) return xn && yn ? 0 : xn ? 1 : -1
+    if (typeof x === 'number' && typeof y === 'number') return sign * (x - y)
+    return sign * collator.compare(String(x), String(y))
+  })
+}

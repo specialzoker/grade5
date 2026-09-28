@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { convert, searchRange, search } from '../src/engine.js'
+import { convert, searchRange, search, applyFilters, sortRows, COL } from '../src/engine.js'
 
 const conv = JSON.parse(readFileSync(new URL('../data/conv.json', import.meta.url), 'utf8'))
 const PAIRS = conv.pairs
@@ -57,4 +57,33 @@ test('search: 양끝 미포함', () => {
 test('search: lo > hi 이거나 범위에 없으면 빈 배열', () => {
   assert.deepEqual(search(ROWS, 1.49, 1.29), [])
   assert.deepEqual(search(ROWS, 0.5, 0.9), [])
+})
+
+const SAMPLE = [
+  ['서울', '한양대', '종합', '고른기회', '자연', '학부A', 5, 20.2, 9, 1.49],
+  ['경기', '가천대', '교과', '특성화고교', '자연', '기계공학부', 4, 15.25, 1, 1.38],
+  ['강원', '강원대', '교과', '저소득전형', '자연', '약학과', 4, 8, 3, 1.45],
+  ['경기', '경기대', '교과', '농어촌학생전형', '인문', '공공안전학부', 3, null, 5, 1.33],
+]
+
+test('applyFilters: 빈 조건은 전체', () => {
+  assert.equal(applyFilters(SAMPLE, { regions: new Set(), type: '', track: '' }).length, 4)
+})
+
+test('applyFilters: 지역 복수 + 전형 + 계열', () => {
+  const r = applyFilters(SAMPLE, { regions: new Set(['경기', '강원']), type: '교과', track: '자연' })
+  assert.deepEqual(r.map((x) => x[COL.univ]), ['가천대', '강원대'])
+})
+
+test('sortRows: 문자열 오름차순(한글), 원본 배열 불변', () => {
+  const s = sortRows(SAMPLE, COL.univ, 'asc')
+  assert.deepEqual(s.map((x) => x[COL.univ]), ['가천대', '강원대', '경기대', '한양대'])
+  assert.equal(SAMPLE[0][COL.univ], '한양대')
+})
+
+test('sortRows: 숫자 내림차순, null은 항상 마지막', () => {
+  const s = sortRows(SAMPLE, COL.ratio, 'desc')
+  assert.deepEqual(s.map((x) => x[COL.ratio]), [20.2, 15.25, 8, null])
+  const a = sortRows(SAMPLE, COL.ratio, 'asc')
+  assert.deepEqual(a.map((x) => x[COL.ratio]), [8, 15.25, 20.2, null])
 })
