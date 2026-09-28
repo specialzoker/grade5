@@ -200,7 +200,7 @@ test('searchRange: 부동소수 오차 없이 소수 셋째자리', () => {
 
 - [ ] **Step 2: 실패 확인**
 
-Run: `export PATH="/c/Users/user/AppData/Local/OpenAI/Codex/runtimes/cua_node/ecfc0d9aa02807e3/bin:$PATH" && node --test test/`
+Run: `export PATH="/c/Users/user/AppData/Local/OpenAI/Codex/runtimes/cua_node/ecfc0d9aa02807e3/bin:$PATH" && node --test test/engine.test.js`
 Expected: FAIL — `Cannot find module '.../src/engine.js'`
 
 - [ ] **Step 3: 구현**
@@ -238,7 +238,7 @@ export function searchRange(conv, down, up) {
 
 - [ ] **Step 4: 통과 확인**
 
-Run: `node --test test/`
+Run: `node --test test/engine.test.js`
 Expected: `# pass 4` `# fail 0`
 
 - [ ] **Step 5: 커밋**
@@ -297,7 +297,7 @@ test('search: lo > hi 이거나 범위에 없으면 빈 배열', () => {
 
 - [ ] **Step 2: 실패 확인**
 
-Run: `node --test test/`
+Run: `node --test test/engine.test.js`
 Expected: FAIL — `search is not a function` (또는 export 없음)
 
 - [ ] **Step 3: 구현**
@@ -315,7 +315,7 @@ export function search(rows, lo, hi) {
 
 - [ ] **Step 4: 통과 확인**
 
-Run: `node --test test/`
+Run: `node --test test/engine.test.js`
 Expected: `# pass 7` `# fail 0`
 
 - [ ] **Step 5: 커밋**
@@ -375,7 +375,7 @@ test('sortRows: 숫자 내림차순, null은 항상 마지막', () => {
 
 - [ ] **Step 2: 실패 확인**
 
-Run: `node --test test/`
+Run: `node --test test/engine.test.js`
 Expected: FAIL — `applyFilters is not a function`
 
 - [ ] **Step 3: 구현**
@@ -408,7 +408,7 @@ export function sortRows(rows, colIndex, dir = 'asc') {
 
 - [ ] **Step 4: 통과 확인**
 
-Run: `node --test test/`
+Run: `node --test test/engine.test.js`
 Expected: `# pass 11` `# fail 0`
 
 - [ ] **Step 5: 커밋**
@@ -719,7 +719,7 @@ PYTHONIOENCODING=utf-8 python scripts/extract.py "C:\경로\5등급.xlsx"
 node는 이 PC의 PATH에 없다.
 ```bash
 export PATH="/c/Users/user/AppData/Local/OpenAI/Codex/runtimes/cua_node/<hash>/bin:$PATH"
-node --test test/
+node --test test/engine.test.js
 ```
 
 ## 로컬 실행
