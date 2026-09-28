@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "grade5", "runtimeExecutable": "python", "runtimeArgs": ["-m", "http.server", "5180"], "port": 5180 }
+  ]
+}
