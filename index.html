@@ -14,7 +14,7 @@
   * { box-sizing: border-box; }
   body { margin:0; background:var(--cream); color:var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; font-size:14px; }
-  .wrap { max-width:1400px; margin:0 auto; padding:20px 16px 40px; }
+  .wrap { max-width:1800px; margin:0 auto; padding:20px 16px 40px; }
   header h1 { margin:0; color:var(--green); font-size:22px; }
   header p { margin:4px 0 0; color:var(--muted); }
   header .src { font-size:12px; }
@@ -43,6 +43,7 @@
   th:hover { background:var(--green-mid); }
   th .arrow { opacity:.5; font-size:11px; margin-left:4px; }
   th.sorted .arrow { opacity:1; }
+  td.wrap-text { white-space:normal; min-width:160px; }
   td.num { text-align:right; font-variant-numeric: tabular-nums; }
   td.cut { font-weight:700; color:var(--green); }
   tbody tr:hover { background:#f3f6ee; }
@@ -196,6 +197,7 @@ function draw(rows, emptyMsg) {
     r.forEach((v, i) => {
       const td = document.createElement('td')
       if (NUM_COLS.has(i)) td.className = i === COL.cut70 ? 'num cut' : 'num'
+      else if (i === COL.typeName || i === COL.unit) td.className = 'wrap-text'
       td.textContent = v == null ? '-' : i === COL.cut70 ? Number(v).toFixed(2) : String(v)
       tr.appendChild(td)
     })
