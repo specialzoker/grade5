@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { convert, searchRange } from '../src/engine.js'
+import { convert, searchRange, search } from '../src/engine.js'
 
 const conv = JSON.parse(readFileSync(new URL('../data/conv.json', import.meta.url), 'utf8'))
 const PAIRS = conv.pairs
@@ -29,4 +29,32 @@ test('searchRange: 부동소수 오차 없이 소수 셋째자리', () => {
   assert.deepEqual(searchRange(1.39, 0.1, 0.1), { lo: 1.29, hi: 1.49 })
   assert.deepEqual(searchRange(1.39, 0.2, 0.05), { lo: 1.19, hi: 1.44 })
   assert.deepEqual(searchRange(1.39, 0, 0), { lo: 1.39, hi: 1.39 })
+})
+
+const ipgyeol = JSON.parse(readFileSync(new URL('../data/ipgyeol.json', import.meta.url), 'utf8'))
+const golden = JSON.parse(readFileSync(new URL('../test-data/golden.json', import.meta.url), 'utf8'))
+const ROWS = ipgyeol.rows
+
+test('search 골든: 입력 1.1 → 결과시트 259행과 집합 일치', () => {
+  const c = convert(golden.input, PAIRS)
+  assert.equal(c, golden.converted)
+  const { lo, hi } = searchRange(c, 0.1, 0.1)
+  assert.equal(lo, golden.lo)
+  assert.equal(hi, golden.hi)
+  const got = search(ROWS, lo, hi)
+  assert.equal(got.length, 259)
+  const key = (r) => r.slice(0, 6).join('|') + '|' + r[9]
+  assert.deepEqual(new Set(got.map(key)), new Set(golden.rows.map(key)))
+})
+
+test('search: 양끝 미포함', () => {
+  const got = search(ROWS, 1.29, 1.49)
+  assert.ok(got.every((r) => r[9] > 1.29 && r[9] < 1.49))
+  assert.ok(ROWS.some((r) => r[9] === 1.29), '데이터에 1.29 행이 있어야 경계 테스트가 의미 있음')
+  assert.ok(ROWS.some((r) => r[9] === 1.49))
+})
+
+test('search: lo > hi 이거나 범위에 없으면 빈 배열', () => {
+  assert.deepEqual(search(ROWS, 1.49, 1.29), [])
+  assert.deepEqual(search(ROWS, 0.5, 0.9), [])
 })

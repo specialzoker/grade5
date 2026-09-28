@@ -25,3 +25,11 @@ const r3 = (x) => Math.round(x * 1000) / 1000
 export function searchRange(conv, down, up) {
   return { lo: r3(conv - down), hi: r3(conv + up) }
 }
+
+/** lo < cut70 < hi 인 행만 (양끝 미포함 — 엑셀 결과시트 재현). */
+export function search(rows, lo, hi) {
+  return rows.filter((r) => {
+    const c = r[COL.cut70]
+    return typeof c === 'number' && c > lo && c < hi
+  })
+}
