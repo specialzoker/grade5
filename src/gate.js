@@ -59,6 +59,7 @@ export function initGate(db) {
 
   function open(a) {
     overlay.style.display = 'none'
+    msg.textContent = ''
     who.textContent = a.who
     whoLine.style.display = ''
   }
