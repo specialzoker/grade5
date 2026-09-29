@@ -15,6 +15,9 @@
   body { margin:0; background:var(--cream); color:var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; font-size:14px; }
   .wrap { max-width:1800px; margin:0 auto; padding:20px 16px 40px; }
+  .top { display:flex; align-items:flex-start; gap:20px; flex-wrap:wrap; }
+  .top-left { flex:1 1 620px; min-width:0; }
+  .badge { width:260px; max-width:100%; height:auto; flex:none; margin-top:4px; }
   header h1 { margin:0; color:var(--green); font-size:22px; }
   header p { margin:4px 0 0; color:var(--muted); }
   header .src { font-size:12px; }
@@ -56,10 +59,12 @@
 </head>
 <body>
 <div class="wrap">
+  <div class="top">
+  <div class="top-left">
   <header>
     <h1>5등급제 입결 검색</h1>
     <p>5등급제 내신 → 환산 9등급 → 2026학년도 70% cut이 그 근처인 모집단위</p>
-    <p class="src">출처: 2026학년도 입결(70% cut) · 5등급⇔9등급 변환표. 상담 참고용.</p>
+    <p class="src">출처: 2026학년도 입결(70% cut) · 5등급⇔9등급 변환은 경기진학지도협의회 표본 누적비 기준. 상담 참고용.</p>
   </header>
 
   <section class="card">
@@ -80,6 +85,9 @@
     </div>
     <div id="hint" class="hint">등급을 입력하세요.</div>
   </section>
+  </div>
+  <img class="badge" src="./assets/gyeonggi-jinhyup.png" alt="경기진학지도협의회 — 공교육, 학교의 테두리 내에서만 활용해주시고, 해당 자료가 사교육에서 사용되는 것을 금합니다." />
+  </div>
 
   <section class="card">
     <div class="filters">
