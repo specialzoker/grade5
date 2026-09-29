@@ -17,7 +17,10 @@
   .wrap { max-width:1800px; margin:0 auto; padding:20px 16px 40px; }
   .top { display:flex; align-items:flex-start; gap:20px; flex-wrap:wrap; }
   .top-left { flex:1 1 620px; min-width:0; }
-  .badge { width:260px; max-width:100%; height:auto; flex:none; margin-top:4px; }
+  .badge { width:300px; max-width:100%; flex:none; text-align:center; padding:8px 8px 4px; }
+  .badge img { width:110px; height:auto; display:block; margin:0 auto 6px; }
+  .badge .org { font-size:19px; font-weight:800; color:#222; letter-spacing:1px; margin:0 0 8px; }
+  .badge .notice { font-size:12px; font-weight:700; color:#c0392b; line-height:1.5; margin:0; word-break:keep-all; }
   header h1 { margin:0; color:var(--green); font-size:22px; }
   header p { margin:4px 0 0; color:var(--muted); }
   header .src { font-size:12px; }
@@ -86,7 +89,11 @@
     <div id="hint" class="hint">등급을 입력하세요.</div>
   </section>
   </div>
-  <img class="badge" src="./assets/gyeonggi-jinhyup.png" alt="경기진학지도협의회 — 공교육, 학교의 테두리 내에서만 활용해주시고, 해당 자료가 사교육에서 사용되는 것을 금합니다." />
+  <div class="badge">
+    <img src="./assets/gyeonggi-jinhyup-logo.png" alt="경기진학지도협의회 로고" />
+    <p class="org">경기진학지도협의회</p>
+    <p class="notice">※ 공교육, 학교의 테두리 내에서만 활용해주시고,<br />해당 자료가 사교육에서 사용되는 것을 금합니다.</p>
+  </div>
   </div>
 
   <section class="card">
