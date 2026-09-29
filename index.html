@@ -58,9 +58,60 @@
     .field input { width:90px; }
     .count { margin-left:0; width:100%; }
   }
+  /* ── 입장 게이트 ── */
+  #gate { position:fixed; inset:0; background:var(--cream); z-index:1000; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .gate-card { width:100%; max-width:440px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px 22px; text-align:center; }
+  .gate-card img { width:90px; display:block; margin:0 auto 8px; }
+  .gate-card h2 { margin:0 0 4px; color:var(--green); font-size:20px; }
+  .gate-card p { margin:0 0 14px; color:var(--muted); font-size:13px; }
+  .gate-card input { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:6px; font-size:15px; margin-bottom:8px; }
+  .gate-card button { width:100%; padding:10px; background:var(--green); color:#fff; border:none; border-radius:6px; font-size:15px; cursor:pointer; }
+  .gate-card button:disabled { opacity:.6; }
+  .gate-msg { min-height:20px; margin-top:8px; font-size:13px; color:#a3462a; }
+  .who { font-size:12px; color:var(--muted); margin:6px 0 0; }
+  .who b { color:var(--green); }
+  .who button { background:none; border:none; color:var(--muted); text-decoration:underline; cursor:pointer; font-size:12px; margin-left:4px; }
+  /* ── 관리자 ── */
+  .admin-btn { position:fixed; right:12px; bottom:12px; width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--card); color:var(--muted); cursor:pointer; font-size:16px; z-index:900; }
+  #adminPanel { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:2000; display:none; align-items:flex-start; justify-content:center; padding:24px 12px; overflow-y:auto; }
+  #adminPanel.open { display:flex; }
+  .admin-card { width:100%; max-width:860px; background:#1a1a1a; color:#eee; border:1px solid #333; border-radius:12px; padding:18px; }
+  .admin-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .admin-head h3 { margin:0; font-size:15px; }
+  .admin-head button { background:none; border:none; color:#aaa; font-size:16px; cursor:pointer; }
+  .admin-card input { background:#111; color:#eee; border:1px solid #333; border-radius:5px; padding:6px 8px; font-size:13px; }
+  .admin-card button { background:#2f6b45; color:#fff; border:none; border-radius:5px; padding:6px 10px; font-size:12px; cursor:pointer; }
+  .admin-card button.danger { background:#7f1d1d; }
+  .admin-card button.ghost { background:#333; }
+  .admin-tabs { display:flex; gap:6px; margin:8px 0 12px; }
+  .admin-tabs button { background:#333; }
+  .admin-tabs button.on { background:#2f6b45; }
+  .admin-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:8px; }
+  .admin-row input { flex:1 1 140px; }
+  .admin-muted { color:#888; font-size:11px; margin:4px 0 8px; }
+  .admin-list { max-height:60vh; overflow:auto; border:1px solid #2a2a2a; border-radius:6px; }
+  .admin-item { display:grid; grid-template-columns:1.2fr .8fr 1.6fr 1.2fr auto; gap:6px; align-items:center; padding:5px 8px; border-bottom:1px solid #2a2a2a; font-size:12px; }
+  .admin-item.em { grid-template-columns:2fr 1fr auto; }
+  .admin-item.log { grid-template-columns:1.3fr .6fr 2fr; }
+  .admin-item input { width:100%; }
+  .admin-item .code { font-family:monospace; color:#9ad; word-break:break-all; }
+  #toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#222; color:#fff; padding:8px 14px; border-radius:6px; font-size:13px; opacity:0; transition:opacity .2s; z-index:3000; pointer-events:none; }
+  #toast.show { opacity:1; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+<div id="gate">
+  <div class="gate-card">
+    <img src="./assets/gyeonggi-jinhyup-logo.png" alt="" />
+    <h2>5등급제 입결 검색</h2>
+    <p>학교 홈페이지 주소(코드) 또는 등록된 이메일을 입력하세요.</p>
+    <input id="gateInput" placeholder="예: gaun-h.goegn.kr" autocomplete="off" />
+    <button id="gateBtn" type="button">입장</button>
+    <div id="gateMsg" class="gate-msg"></div>
+  </div>
+</div>
 <div class="wrap">
   <div class="top">
   <div class="top-left">
@@ -93,6 +144,7 @@
     <img src="./assets/gyeonggi-jinhyup-logo.png" alt="경기진학지도협의회 로고" />
     <p class="org">경기진학지도협의회</p>
     <p class="notice">※ 공교육, 학교의 테두리 내에서만 활용해주시고,<br />해당 자료가 사교육에서 사용되는 것을 금합니다.</p>
+    <p class="who" style="display:none"><b id="gateWho"></b> · <button id="gateLeave" type="button">나가기</button></p>
   </div>
   </div>
 
@@ -117,6 +169,58 @@
   </section>
 </div>
 
+<button id="adminBtn" class="admin-btn" type="button" title="관리자">⚙</button>
+<div id="adminPanel">
+  <div class="admin-card">
+    <div class="admin-head"><h3>관리자</h3><button id="adminClose" type="button">✕</button></div>
+    <div id="adminLock" class="admin-row">
+      <input id="adminPw" type="password" placeholder="관리자 비밀번호" />
+      <button id="adminPwBtn" type="button">확인</button>
+    </div>
+    <div id="adminContent" style="display:none">
+      <div class="admin-tabs">
+        <button data-tab="schools" class="on" type="button">학교</button>
+        <button data-tab="emails" type="button">이메일</button>
+        <button data-tab="logs" type="button">입장 기록</button>
+        <button data-tab="etc" type="button">설정</button>
+      </div>
+      <section data-pane="schools">
+        <div class="admin-row">
+          <input id="schName" placeholder="학교명" /><input id="schOffice" placeholder="지원청" /><input id="schHome" placeholder="홈페이지 주소" />
+          <button id="schAdd" type="button">추가</button>
+          <button id="schBulk" type="button" class="ghost" title="data/schools.json에서 없는 학교만 넣기">일괄 등록</button>
+        </div>
+        <div id="schCount" class="admin-muted"></div>
+        <div id="schList" class="admin-list"></div>
+      </section>
+      <section data-pane="emails" style="display:none">
+        <div class="admin-row">
+          <input id="emAddr" placeholder="이메일" /><input id="emName" placeholder="이름(선택)" />
+          <button id="emAdd" type="button">추가</button>
+        </div>
+        <div id="emList" class="admin-list"></div>
+      </section>
+      <section data-pane="logs" style="display:none">
+        <div id="logList" class="admin-list"></div>
+      </section>
+      <section data-pane="etc" style="display:none">
+        <div class="admin-row"><input id="pw1" type="password" placeholder="새 비밀번호" /><input id="pw2" type="password" placeholder="확인" /><button id="pwChange" type="button">비밀번호 변경</button></div>
+        <p class="admin-muted">비밀번호는 허브(sujifather)·통합검색기와 같은 저장키를 씁니다.</p>
+        <div class="admin-row"><button id="resetAll" type="button" class="danger">모든 기억 초기화</button><span class="admin-muted">모든 브라우저가 다음 접속 때 코드를 다시 입력해야 합니다.</span></div>
+      </section>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script type="module">
+  import { getDb } from './src/firebase.js'
+  import { initGate } from './src/gate.js'
+  import { initAdmin } from './src/admin.js'
+  const db = getDb()
+  initGate(db)
+  initAdmin(db)
+</script>
 <script type="module" src="./src/app.js"></script>
 </body>
 </html>
