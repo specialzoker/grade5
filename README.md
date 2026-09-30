@@ -17,8 +17,8 @@
 
 앱은 **학교 코드** 또는 **등록 이메일**을 입력해야 열린다. 한 번 통과한 브라우저는 `localStorage['grade5_access']`에 기억돼 다음부터 바로 열린다.
 
-- 학교 코드 = 학교 홈페이지 도메인(예 `gaun-h.goegn.kr`). 입력은 소문자·`https://`·경로·앞 `www.` 제거 후 비교하므로 `https://www.gaun-h.goegn.kr/gaun-h/main.do`도 통과.
-- 학교 목록 원본: `5등급학교.xlsx` 102교. 홈페이지는 웹 조사(`data/schools.json`). 경기도 학교 대부분이 `*.hs.kr`에서 교육지원청 도메인 `*-h.goeXX.kr`로 이전돼 있어 현행 주소를 기준으로 했다.
+- 학교 코드 = 학교 홈페이지 도메인(예 `hakgyo-h.goexx.kr`(가상의 예)). 입력은 소문자·`https://`·경로·앞 `www.` 제거 후 비교하므로 `https://www.hakgyo-h.goexx.kr/main.do`처럼 붙여넣어도 통과.
+- 학교 목록 원본: `5등급학교.xlsx` 102교. 홈페이지는 웹 조사(로컬 `data/schools.json`, 코드 목록이라 저장소에는 올리지 않음). 경기도 학교 대부분이 `*.hs.kr`에서 교육지원청 도메인 `*-h.goeXX.kr`로 이전돼 있어 현행 주소를 기준으로 했다.
 - 관리자: 우하단 ⚙ → 비밀번호(허브·통합검색기와 같은 `localStorage['snavi_pw']`, 기본 `xhd1212`) → 학교(추가·수정·삭제·일괄 등록)·이메일·입장 기록·설정(비밀번호 변경, 모든 기억 초기화).
 - 저장: Firebase Firestore 프로젝트 `search-alluniv`(허브와 공유). 컬렉션 `grade5_schools`, `grade5_emails`, `grade5_logs`, `grade5_meta/gate`(기억 버전). 규칙은 클라이언트 자유 읽기/쓰기(소프트 게이트 — 코드를 아는 사람은 누구나 통과).
 - "모든 기억 초기화"는 `grade5_meta/gate.version`을 올려 모든 브라우저가 코드를 다시 입력하게 한다.
