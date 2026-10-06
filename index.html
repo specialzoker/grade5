@@ -90,7 +90,7 @@
   .admin-row input { flex:1 1 140px; }
   .admin-muted { color:#888; font-size:11px; margin:4px 0 8px; }
   .admin-list { max-height:60vh; overflow:auto; border:1px solid #2a2a2a; border-radius:6px; }
-  .admin-item { display:grid; grid-template-columns:1.2fr .8fr 1.6fr 1.2fr auto; gap:6px; align-items:center; padding:5px 8px; border-bottom:1px solid #2a2a2a; font-size:12px; }
+  .admin-item { display:grid; grid-template-columns:1.2fr .7fr 1.5fr 1fr .9fr auto; gap:6px; align-items:center; padding:5px 8px; border-bottom:1px solid #2a2a2a; font-size:12px; }
   .admin-item.em { grid-template-columns:2fr 1fr auto; }
   .admin-item.log { grid-template-columns:1.3fr .6fr 2fr; }
   .admin-item input { width:100%; }
@@ -106,8 +106,8 @@
   <div class="gate-card">
     <img src="./assets/gyeonggi-jinhyup-logo.png" alt="" />
     <h2>5등급제 입결 검색</h2>
-    <p>학교 홈페이지 주소(코드) 또는 등록된 이메일을 입력하세요.</p>
-    <input id="gateInput" placeholder="예: hakgyo-h.goexx.kr" autocomplete="off" />
+    <p>학교 홈페이지 주소, 학교 모의고사 코드(5자리) 또는 등록된 이메일을 입력하세요.</p>
+    <input id="gateInput" placeholder="예: hakgyo-h.goexx.kr 또는 10000" autocomplete="off" />
     <button id="gateBtn" type="button">입장</button>
     <div id="gateMsg" class="gate-msg"></div>
   </div>
@@ -186,7 +186,7 @@
       </div>
       <section data-pane="schools">
         <div class="admin-row">
-          <input id="schName" placeholder="학교명" /><input id="schOffice" placeholder="지원청" /><input id="schHome" placeholder="홈페이지 주소" />
+          <input id="schName" placeholder="학교명" /><input id="schOffice" placeholder="지원청" /><input id="schHome" placeholder="홈페이지 주소" /><input id="schExam" placeholder="모의고사 코드(여러 개면 쉼표)" />
           <button id="schAdd" type="button">추가</button>
           <button id="schBulk" type="button" class="ghost" title="data/schools.json에서 없는 학교만 넣기">일괄 등록</button>
         </div>

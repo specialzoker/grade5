@@ -1,6 +1,6 @@
 // 관리자 모달: 학교(코드)·이메일·입장 기록·설정. 허브(sujifather)의 관리자 패턴을 따른다.
 import { FieldValue } from './firebase.js'
-import { normalizeCode, isEmail } from './gate.js'
+import { normalizeCode, isEmail, parseExamCodes } from './gate.js'
 
 const ADMIN_PW_DEFAULT = 'xhd1212'
 const PW_KEY = 'snavi_pw'   // 허브·통합검색기와 공유(같은 도메인)
@@ -55,6 +55,7 @@ export function initAdmin(db) {
           <input value="${esc(s.office)}" data-f="office" />
           <input value="${esc(s.homepage)}" data-f="homepage" />
           <span class="code">${esc(s.code) || '(코드 없음)'}</span>
+          <input value="${esc((s.examCodes || []).join(', '))}" data-f="exam" placeholder="모의고사 코드" />
           <span><button class="ghost" data-act="save" type="button">저장</button> <button class="danger" data-act="del" type="button">삭제</button></span>
         </div>`
       }).join('')
@@ -70,7 +71,7 @@ export function initAdmin(db) {
         await schools.doc(id).delete(); toast('삭제 완료')
       } else {
         const homepage = get('homepage')
-        await schools.doc(id).set({ name: get('name'), office: get('office'), homepage, code: normalizeCode(homepage) || '' })
+        await schools.doc(id).set({ name: get('name'), office: get('office'), homepage, code: normalizeCode(homepage) || '', examCodes: parseExamCodes(get('exam')) })
         toast('저장 완료')
       }
       loadSchools()
@@ -80,8 +81,8 @@ export function initAdmin(db) {
     const name = $('schName').value.trim(), office = $('schOffice').value.trim(), homepage = $('schHome').value.trim()
     if (!name) { toast('학교명을 입력하세요'); return }
     try {
-      await schools.add({ name, office, homepage, code: normalizeCode(homepage) || '' })
-      $('schName').value = $('schOffice').value = $('schHome').value = ''
+      await schools.add({ name, office, homepage, code: normalizeCode(homepage) || '', examCodes: parseExamCodes($('schExam').value) })
+      $('schName').value = $('schOffice').value = $('schHome').value = $('schExam').value = ''
       toast(`${name} 추가 완료`); loadSchools()
     } catch (err) { fail('추가 실패')(err) }
   })
@@ -95,7 +96,7 @@ export function initAdmin(db) {
       for (let i = 0; i < todo.length; i += 400) {   // Firestore batch 상한 500
         const batch = db.batch()
         for (const r of todo.slice(i, i + 400)) {
-          batch.set(schools.doc(), { name: r.name, office: r.office || '', homepage: r.homepage || '', code: normalizeCode(r.homepage) || '' })
+          batch.set(schools.doc(), { name: r.name, office: r.office || '', homepage: r.homepage || '', code: normalizeCode(r.homepage) || '', examCodes: [] })
         }
         await batch.commit()
       }

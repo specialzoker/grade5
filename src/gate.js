@@ -15,6 +15,16 @@ export function isEmail(input) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(input || '').trim())
 }
 
+/** 학교 모의고사 코드: 숫자 5자리. */
+export function isExamCode(input) {
+  return /^\d{5}$/.test(String(input || '').trim())
+}
+
+/** "17117, 17872" 같은 입력 → ['17117','17872'] (5자리 숫자만, 중복 제거). */
+export function parseExamCodes(input) {
+  return [...new Set(String(input || '').split(/[\s,;/]+/).filter((c) => /^\d{5}$/.test(c)))]
+}
+
 // ── 아래는 브라우저 전용 (Firestore·localStorage·DOM). node 테스트는 위 순수 함수만 임포트한다.
 
 export const ACCESS_KEY = 'grade5_access'
@@ -27,6 +37,11 @@ export function clearAccess() { localStorage.removeItem(ACCESS_KEY) }
 
 /** 입력을 판별해 Firestore로 확인. 성공 → {type, who}; 실패 → null. 오류는 throw. */
 export async function checkAccess(db, input) {
+  if (isExamCode(input)) {
+    const snap = await db.collection('grade5_schools').where('examCodes', 'array-contains', input.trim()).limit(1).get()
+    if (snap.empty) return null
+    return { type: 'school', who: snap.docs[0].data().name }
+  }
   if (isEmail(input)) {
     const email = input.trim().toLowerCase()
     const doc = await db.collection('grade5_emails').doc(email).get()
@@ -77,7 +92,7 @@ export function initGate(db) {
     btn.disabled = true; msg.textContent = '확인 중…'
     try {
       const a = await checkAccess(db, v)
-      if (!a) { msg.textContent = '등록되지 않은 코드/이메일입니다. 학교 홈페이지 주소를 확인하세요.'; return }
+      if (!a) { msg.textContent = '등록되지 않은 코드/이메일입니다. 학교 홈페이지 주소 또는 모의고사 코드를 확인하세요.'; return }
       const ver = await currentVersion(db)
       saveAccess({ ...a, at: Date.now(), v: ver ?? 1 })
       logEntry(db, a)
