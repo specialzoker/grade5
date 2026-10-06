@@ -1,15 +1,5 @@
-// 접근 게이트. 순수 함수(normalizeCode, isEmail)는 DOM·Firebase를 모른다.
+// 접근 게이트. 순수 함수(isEmail, isExamCode, parseExamCodes)는 DOM·Firebase를 모른다.
 import { FieldValue } from './firebase.js'
-
-/** 홈페이지 주소 → 코드. 소문자, 스킴·경로·앞 www. 제거. 빈 값이면 null. */
-export function normalizeCode(input) {
-  if (typeof input !== 'string') return null
-  let s = input.trim().toLowerCase()
-  s = s.replace(/^https?:\/\//, '')
-  s = s.split(/[/?#]/)[0]
-  s = s.replace(/^www\./, '')
-  return s || null
-}
 
 export function isEmail(input) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(input || '').trim())
@@ -47,11 +37,7 @@ export async function checkAccess(db, input) {
     const doc = await db.collection('grade5_emails').doc(email).get()
     return doc.exists ? { type: 'email', who: email } : null
   }
-  const code = normalizeCode(input)
-  if (!code) return null
-  const snap = await db.collection('grade5_schools').where('code', '==', code).limit(1).get()
-  if (snap.empty) return null
-  return { type: 'school', who: snap.docs[0].data().name }
+  return null   // 홈페이지 주소 입장은 2026-10-06 폐지
 }
 
 /** grade5_meta/gate.version. 조회 실패 시 null → 기억을 그대로 신뢰. */
@@ -88,11 +74,12 @@ export function initGate(db) {
 
   async function submit() {
     const v = input.value
-    if (!v.trim()) { msg.textContent = '코드 또는 이메일을 입력하세요.'; return }
+    if (!v.trim()) { msg.textContent = '모의고사 코드 또는 이메일을 입력하세요.'; return }
+    if (!isExamCode(v) && !isEmail(v)) { msg.textContent = '모의고사 코드는 숫자 5자리, 이메일은 전체 주소를 입력하세요.'; return }
     btn.disabled = true; msg.textContent = '확인 중…'
     try {
       const a = await checkAccess(db, v)
-      if (!a) { msg.textContent = '등록되지 않은 코드/이메일입니다. 학교 홈페이지 주소 또는 모의고사 코드를 확인하세요.'; return }
+      if (!a) { msg.textContent = '등록되지 않은 모의고사 코드/이메일입니다.'; return }
       const ver = await currentVersion(db)
       saveAccess({ ...a, at: Date.now(), v: ver ?? 1 })
       logEntry(db, a)

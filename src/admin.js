@@ -1,6 +1,6 @@
 // 관리자 모달: 학교(코드)·이메일·입장 기록·설정. 허브(sujifather)의 관리자 패턴을 따른다.
 import { FieldValue } from './firebase.js'
-import { normalizeCode, isEmail, parseExamCodes } from './gate.js'
+import { isEmail, parseExamCodes } from './gate.js'
 
 const ADMIN_PW_DEFAULT = 'xhd1212'
 const PW_KEY = 'snavi_pw'   // 허브·통합검색기와 공유(같은 도메인)
@@ -46,16 +46,15 @@ export function initAdmin(db) {
     const list = $('schList'); list.innerHTML = '<div class="admin-muted" style="padding:6px">불러오는 중…</div>'
     try {
       const snap = await schools.orderBy('name').get()
-      $('schCount').textContent = `${snap.size}교 · 코드는 홈페이지 주소에서 자동 생성(소문자, www·경로 제거)`
-      if (snap.empty) { list.innerHTML = '<div class="admin-muted" style="padding:6px">등록된 학교 없음 — "일괄 등록"으로 data/schools.json을 넣으세요.</div>'; return }
+      $('schCount').textContent = `${snap.size}교 · 입장은 모의고사 코드(숫자 5자리)로만 가능. 홈페이지는 참고용`
+      if (snap.empty) { list.innerHTML = '<div class="admin-muted" style="padding:6px">등록된 학교 없음</div>'; return }
       list.innerHTML = snap.docs.map((d) => {
         const s = d.data()
         return `<div class="admin-item" data-id="${d.id}">
           <input value="${esc(s.name)}" data-f="name" />
           <input value="${esc(s.office)}" data-f="office" />
           <input value="${esc(s.homepage)}" data-f="homepage" />
-          <span class="code">${esc(s.code) || '(코드 없음)'}</span>
-          <input value="${esc((s.examCodes || []).join(', '))}" data-f="exam" placeholder="모의고사 코드" />
+          <input value="${esc((s.examCodes || []).join(', '))}" data-f="exam" placeholder="모의고사 코드" class="code" />
           <span><button class="ghost" data-act="save" type="button">저장</button> <button class="danger" data-act="del" type="button">삭제</button></span>
         </div>`
       }).join('')
@@ -70,8 +69,7 @@ export function initAdmin(db) {
         if (!confirm(`${get('name')} 을(를) 삭제할까요?`)) return
         await schools.doc(id).delete(); toast('삭제 완료')
       } else {
-        const homepage = get('homepage')
-        await schools.doc(id).set({ name: get('name'), office: get('office'), homepage, code: normalizeCode(homepage) || '', examCodes: parseExamCodes(get('exam')) })
+        await schools.doc(id).set({ name: get('name'), office: get('office'), homepage: get('homepage'), examCodes: parseExamCodes(get('exam')) })
         toast('저장 완료')
       }
       loadSchools()
@@ -81,29 +79,11 @@ export function initAdmin(db) {
     const name = $('schName').value.trim(), office = $('schOffice').value.trim(), homepage = $('schHome').value.trim()
     if (!name) { toast('학교명을 입력하세요'); return }
     try {
-      await schools.add({ name, office, homepage, code: normalizeCode(homepage) || '', examCodes: parseExamCodes($('schExam').value) })
+      await schools.add({ name, office, homepage, examCodes: parseExamCodes($('schExam').value) })
       $('schName').value = $('schOffice').value = $('schHome').value = $('schExam').value = ''
       toast(`${name} 추가 완료`); loadSchools()
     } catch (err) { fail('추가 실패')(err) }
   })
-  $('schBulk').addEventListener('click', async () => {
-    try {
-      const rows = await fetch('./data/schools.json').then((r) => r.json())
-      const existing = new Set((await schools.get()).docs.map((d) => d.data().name))
-      const todo = rows.filter((r) => !existing.has(r.name))
-      if (!todo.length) { toast('추가할 학교가 없습니다'); return }
-      if (!confirm(`${todo.length}교를 등록할까요? (이미 있는 ${existing.size}교는 건너뜀)`)) return
-      for (let i = 0; i < todo.length; i += 400) {   // Firestore batch 상한 500
-        const batch = db.batch()
-        for (const r of todo.slice(i, i + 400)) {
-          batch.set(schools.doc(), { name: r.name, office: r.office || '', homepage: r.homepage || '', code: normalizeCode(r.homepage) || '', examCodes: [] })
-        }
-        await batch.commit()
-      }
-      toast(`${todo.length}교 등록 완료`); loadSchools()
-    } catch (err) { fail('일괄 등록 실패')(err) }
-  })
-
   // ── 이메일 ──
   const emails = db.collection('grade5_emails')
   async function loadEmails() {
