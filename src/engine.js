@@ -56,3 +56,16 @@ export function sortRows(rows, colIndex, dir = 'asc') {
     return sign * collator.compare(String(x), String(y))
   })
 }
+
+const squash = (s) => String(s ?? '').replace(/\s+/g, '').toLowerCase()
+
+/** 대학명·전형명·모집단위 검색. 검색어를 공백으로 나눈 각 단어가 (세 필드를 이어붙인 문자열에) 모두 들어 있어야 함.
+ *  공백·대소문자 무시. 빈 검색어면 rows 그대로. */
+export function matchQuery(rows, query) {
+  const words = String(query ?? '').trim().split(/\s+/).filter(Boolean).map(squash)
+  if (!words.length) return rows
+  return rows.filter((r) => {
+    const hay = squash(r[COL.univ]) + '|' + squash(r[COL.typeName]) + '|' + squash(r[COL.unit])
+    return words.every((w) => hay.includes(w))
+  })
+}

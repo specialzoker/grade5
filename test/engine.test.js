@@ -87,3 +87,28 @@ test('sortRows: 숫자 내림차순, null은 항상 마지막', () => {
   const a = sortRows(SAMPLE, COL.ratio, 'asc')
   assert.deepEqual(a.map((x) => x[COL.ratio]), [8, 15.25, 20.2, null])
 })
+
+import { matchQuery } from '../src/engine.js'
+
+test('matchQuery: 빈 검색어는 전체', () => {
+  assert.equal(matchQuery(SAMPLE, '').length, 4)
+  assert.equal(matchQuery(SAMPLE, '   ').length, 4)
+})
+
+test('matchQuery: 대학명·전형명·모집단위에서 부분 일치, 공백·대소문자 무시', () => {
+  assert.deepEqual(matchQuery(SAMPLE, '가천').map((r) => r[COL.univ]), ['가천대'])
+  assert.deepEqual(matchQuery(SAMPLE, '약학').map((r) => r[COL.unit]), ['약학과'])
+  assert.deepEqual(matchQuery(SAMPLE, '농어촌').map((r) => r[COL.univ]), ['경기대'])
+  assert.deepEqual(matchQuery(SAMPLE, '기계 공학').map((r) => r[COL.univ]), ['가천대'])
+})
+
+test('matchQuery: 여러 단어는 모두 포함(AND), 필드를 넘나들어도 됨', () => {
+  assert.deepEqual(matchQuery(SAMPLE, '강원대 약학').map((r) => r[COL.univ]), ['강원대'])
+  assert.deepEqual(matchQuery(SAMPLE, '강원대 기계'), [])
+})
+
+test('matchQuery: 실제 데이터 — 건국대 수의예과', () => {
+  const r = matchQuery(ROWS, '건국대 수의')
+  assert.ok(r.length >= 1)
+  assert.ok(r.every((x) => x[COL.univ].startsWith('건국대') && x[COL.unit].includes('수의')))
+})

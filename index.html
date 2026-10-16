@@ -35,6 +35,11 @@
   .hint { margin-top:10px; color:var(--muted); }
   .hint b { color:var(--green); }
   .hint.warn { color:#a3462a; }
+  .search-row { display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; margin-bottom:12px; }
+  #q { flex:0 1 420px; min-width:0; width:100%; padding:9px 12px; border:1px solid var(--line); border-radius:6px; font-size:15px; background:#fff; }
+  #q:focus { outline:2px solid var(--green-soft); border-color:transparent; }
+  .all-range { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); cursor:pointer; user-select:none; }
+  .all-range input { accent-color:var(--green); width:16px; height:16px; }
   .filters { display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; }
   .chips { display:flex; flex-wrap:wrap; gap:6px; }
   .chip { border:1px solid var(--line); background:#fff; border-radius:999px; padding:4px 11px; cursor:pointer; font-size:13px; color:var(--text); }
@@ -54,6 +59,8 @@
   td.cut { font-weight:700; color:var(--green); }
   tbody tr:hover { background:#f3f6ee; }
   .empty { padding:40px 16px; text-align:center; color:var(--muted); }
+  .empty b { color:var(--green); }
+  .link-btn { background:none; border:none; color:var(--green); text-decoration:underline; cursor:pointer; font-size:inherit; padding:0; font-weight:600; }
   @media (max-width: 600px) {
     .field input { width:90px; }
     .count { margin-left:0; width:100%; }
@@ -149,6 +156,10 @@
   </div>
 
   <section class="card">
+    <div class="search-row">
+      <input id="q" type="search" placeholder="대학·학과·전형 검색 (예: 건국대 수의)" autocomplete="off" />
+      <label class="all-range"><input id="allRange" type="checkbox" /> 성적 범위 무시하고 전체 입결에서 찾기</label>
+    </div>
     <div class="filters">
       <div class="chips" id="regionChips"></div>
       <select id="typeSel">
